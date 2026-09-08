@@ -1,0 +1,32 @@
+{
+  "name": "deriv-martingale-bot-ti-v1",
+  "version": "1.0.0",
+  "description": "T.I V1 - Martingale Trading Bot for Deriv with XML Strategy Configuration",
+  "main": "src/bot.js",
+  "scripts": {
+    "start": "node src/bot.js",
+    "dev": "node --watch src/bot.js",
+    "test": "node tests/test-bot.js",
+    "generate-xml": "node src/xmlGenerator.js",
+    "paper": "node src/bot.js --paper",
+    "live": "node src/bot.js --live"
+  },
+  "keywords": [
+    "deriv",
+    "trading",
+    "martingale",
+    "bot",
+    "websocket",
+    "digit-over-under"
+  ],
+  "author": "T.I V1 Bot",
+  "license": "MIT",
+  "dependencies": {
+    "xml2js": "^0.6.2",
+    "dotenv": "^16.0.3",
+    "websocket": "^1.0.34"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.0"
+  }
+}
