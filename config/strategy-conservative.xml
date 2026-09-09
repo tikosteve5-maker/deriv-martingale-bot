@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<strategy name="T.I V1 - Conservative Settings" version="1.0">
+  <!-- Conservative configuration for lower risk -->
+  
+  <metadata>
+    <description>Conservative variant: Lower stakes, wider entry requirements</description>
+    <author>T.I V1 Bot</author>
+  </metadata>
+
+  <market>
+    <symbol>R_100</symbol>
+    <contract_type>DIGITUNDER</contract_type>
+  </market>
+
+  <entry_point>
+    <sample_size>15</sample_size>
+    <barrier>4</barrier>
+    <min_frequency>70</min_frequency>
+    <confirmation_type>frequency</confirmation_type>
+    <recent_digit_confirmation>true</recent_digit_confirmation>
+  </entry_point>
+
+  <stakes>
+    <stake_1>0.5</stake_1>
+    <stake_2>1.0</stake_2>
+    <martingale_multiplier>2.0</martingale_multiplier>
+    <max_martingale_steps>3</max_martingale_steps>
+  </stakes>
+
+  <risk_management>
+    <take_profit>50.0</take_profit>
+    <stop_loss>30.0</stop_loss>
+  </risk_management>
+
+  <contract>
+    <duration>1</duration>
+    <duration_unit>t</duration_unit>
+  </contract>
+
+  <bot_config>
+    <trading_mode>paper</trading_mode>
+    <initial_balance>5000.0</initial_balance>
+    <log_level>INFO</log_level>
+    <state_file>./state/bot-state-conservative.json</state_file>
+  </bot_config>
+</strategy>

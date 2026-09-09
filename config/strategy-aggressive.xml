@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<strategy name="T.I V1 - Aggressive Settings" version="1.0">
+  <!-- Aggressive configuration for higher potential gains -->
+  
+  <metadata>
+    <description>Aggressive variant: Higher stakes, tighter entry requirements</description>
+    <author>T.I V1 Bot</author>
+  </metadata>
+
+  <market>
+    <symbol>R_100</symbol>
+    <contract_type>DIGITOVER</contract_type>
+  </market>
+
+  <entry_point>
+    <sample_size>8</sample_size>
+    <barrier>6</barrier>
+    <min_frequency>50</min_frequency>
+    <confirmation_type>frequency</confirmation_type>
+    <recent_digit_confirmation>true</recent_digit_confirmation>
+  </entry_point>
+
+  <stakes>
+    <stake_1>2.0</stake_1>
+    <stake_2>5.0</stake_2>
+    <martingale_multiplier>2.5</martingale_multiplier>
+    <max_martingale_steps>5</max_martingale_steps>
+  </stakes>
+
+  <risk_management>
+    <take_profit>500.0</take_profit>
+    <stop_loss>100.0</stop_loss>
+  </risk_management>
+
+  <contract>
+    <duration>1</duration>
+    <duration_unit>t</duration_unit>
+  </contract>
+
+  <bot_config>
+    <trading_mode>paper</trading_mode>
+    <initial_balance>20000.0</initial_balance>
+    <log_level>INFO</log_level>
+    <state_file>./state/bot-state-aggressive.json</state_file>
+  </bot_config>
+</strategy>

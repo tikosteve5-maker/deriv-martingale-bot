@@ -1,0 +1,213 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<strategy name="T.I V1 - Deriv Martingale Bot" version="1.0">
+  <!-- Strategy Metadata -->
+  <metadata>
+    <description>T.I V1 is a sophisticated martingale trading bot for Deriv Digit Over/Under contracts</description>
+    <author>T.I V1 Bot</author>
+    <created>2026-09-09</created>
+    <lastModified>2026-09-09</lastModified>
+  </metadata>
+
+  <!-- Market Configuration -->
+  <market>
+    <symbol>R_100</symbol>
+    <description>Volatility Index 100</description>
+    <contract_type>DIGITOVER</contract_type>
+  </market>
+
+  <!-- Entry Point Configuration -->
+  <!-- This block handles WHEN the bot enters a trade -->
+  <entry_point>
+    <!-- Number of recent digits to analyze -->
+    <sample_size>10</sample_size>
+    
+    <!-- Barrier: for DIGITOVER, analyzes digits > barrier; for DIGITUNDER, < barrier -->
+    <barrier>5</barrier>
+    
+    <!-- Minimum frequency (percentage) of qualifying digits required to enter -->
+    <!-- Example: if min_frequency=60, need 60% of digits to match the condition -->
+    <min_frequency>60</min_frequency>
+    
+    <!-- Confirmation type: 'frequency', 'consecutive', 'recent' -->
+    <confirmation_type>frequency</confirmation_type>
+    
+    <!-- Verify that the most recent digit confirms the pattern -->
+    <recent_digit_confirmation>true</recent_digit_confirmation>
+  </entry_point>
+
+  <!-- Stake Configuration -->
+  <!-- CRITICAL STAKE RULES:
+       - stake_1: Used ONLY for the first trade ever
+       - stake_2: Permanent base stake after first trade
+       - martingale: Applied to stake_2 base on losses
+       - Pattern: Stake1 -> Stake2 -> Stake2*2 -> Stake2*4 -> Stake2*2 (on win)
+  -->
+  <stakes>
+    <!-- First trade only (persisted across restarts) -->
+    <stake_1>1.0</stake_1>
+    
+    <!-- Base stake for all trades after first, and base for martingale -->
+    <stake_2>2.0</stake_2>
+    
+    <!-- Multiplier applied each loss (stakes are doubled on each loss) -->
+    <martingale_multiplier>2.0</martingale_multiplier>
+    
+    <!-- Maximum number of martingale steps before resetting -->
+    <max_martingale_steps>4</max_martingale_steps>
+  </stakes>
+
+  <!-- Risk Management Configuration -->
+  <risk_management>
+    <!-- Target profit: bot stops when session profit reaches this amount -->
+    <take_profit>100.0</take_profit>
+    
+    <!-- Maximum loss: bot stops when session loss reaches this amount -->
+    <stop_loss>50.0</stop_loss>
+  </risk_management>
+
+  <!-- Contract Settings -->
+  <contract>
+    <!-- Duration: number of ticks -->
+    <duration>1</duration>
+    
+    <!-- Duration unit: 't' for ticks, 's' for seconds, 'm' for minutes, 'h' for hours, 'd' for days -->
+    <duration_unit>t</duration_unit>
+  </contract>
+
+  <!-- Bot Configuration -->
+  <bot_config>
+    <!-- Trading mode: 'paper' for simulated, 'live' for real money -->
+    <trading_mode>paper</trading_mode>
+    
+    <!-- Initial balance for paper trading -->
+    <initial_balance>10000.0</initial_balance>
+    
+    <!-- Logging level: DEBUG, INFO, WARN, ERROR -->
+    <log_level>INFO</log_level>
+    
+    <!-- State persistence file -->
+    <state_file>./state/bot-state.json</state_file>
+  </bot_config>
+
+  <!-- Trading Rules and Constraints -->
+  <rules>
+    <!-- Do not trade if entry point history is insufficient -->
+    <insufficient_history>skip_trade</insufficient_history>
+    
+    <!-- Do not trade if entry conditions not met -->
+    <entry_conditions_not_met>skip_trade</entry_conditions_not_met>
+    
+    <!-- Do not trade if balance insufficient -->
+    <insufficient_balance>stop_session</insufficient_balance>
+    
+    <!-- Action on take profit reached -->
+    <take_profit_reached>stop_session</take_profit_reached>
+    
+    <!-- Action on stop loss reached -->
+    <stop_loss_reached>stop_session</stop_loss_reached>
+  </rules>
+
+  <!-- Block Flow Definition -->
+  <!-- This defines the exact order of execution -->
+  <block_flow>
+    <block order="1" name="START" description="Initialize bot and load configuration"/>
+    <block order="2" name="ENTRY_POINT" description="Analyze recent digits and confirm entry conditions"/>
+    <block order="3" name="PURCHASE_CONDITION" description="Verify all pre-trade requirements"/>
+    <block order="4" name="STAKE_1" description="Use initial stake for first trade only"/>
+    <block order="5" name="STAKE_2" description="Permanent base stake after first trade"/>
+    <block order="6" name="MARTINGALE" description="Apply martingale progression on losses"/>
+    <block order="7" name="PLACE_TRADE" description="Execute the contract purchase"/>
+    <block order="8" name="MONITOR" description="Wait for contract result"/>
+    <block order="9" name="WIN_LOSS" description="Determine trade outcome"/>
+    <block order="10" name="RISK_LIMITS" description="Check take profit and stop loss"/>
+    <block order="11" name="TRADE_AGAIN" description="Loop back to entry point if allowed"/>
+    <block order="12" name="RESTART" description="Reset all state for new trading cycle"/>
+  </block_flow>
+
+  <!-- Example Stake Cycle -->
+  <!-- This demonstrates the expected stake progression -->
+  <stake_cycle_example>
+    <cycle>
+      <trade_number>1</trade_number>
+      <result>WIN</result>
+      <stake_used>1.0</stake_used>
+      <next_stake>2.0</next_stake>
+      <note>First trade uses Stake 1</note>
+    </cycle>
+    <cycle>
+      <trade_number>2</trade_number>
+      <result>WIN</result>
+      <stake_used>2.0</stake_used>
+      <next_stake>2.0</next_stake>
+      <note>After first trade, Stake 2 becomes base</note>
+    </cycle>
+    <cycle>
+      <trade_number>3</trade_number>
+      <result>LOSS</result>
+      <stake_used>2.0</stake_used>
+      <next_stake>4.0</next_stake>
+      <note>Loss triggers martingale: 2.0 * 2.0 = 4.0</note>
+    </cycle>
+    <cycle>
+      <trade_number>4</trade_number>
+      <result>LOSS</result>
+      <stake_used>4.0</stake_used>
+      <next_stake>8.0</next_stake>
+      <note>Another loss: 4.0 * 2.0 = 8.0</note>
+    </cycle>
+    <cycle>
+      <trade_number>5</trade_number>
+      <result>WIN</result>
+      <stake_used>8.0</stake_used>
+      <next_stake>2.0</next_stake>
+      <note>Win after martingale: reset to Stake 2 (NOT Stake 1)</note>
+    </cycle>
+    <cycle>
+      <trade_number>6</trade_number>
+      <result>WIN</result>
+      <stake_used>2.0</stake_used>
+      <next_stake>2.0</next_stake>
+      <note>Continue with base stake</note>
+    </cycle>
+  </stake_cycle_example>
+
+  <!-- Entry Point Examples -->
+  <entry_point_examples>
+    <example>
+      <description>Digit Under 5 - High Frequency</description>
+      <barrier>5</barrier>
+      <contract_type>DIGITUNDER</contract_type>
+      <recent_digits>[7, 2, 8, 5, 9, 1, 6, 4, 8, 3]</recent_digits>
+      <under_5_digits>[2, 1, 4, 3]</under_5_digits>
+      <frequency>40%</frequency>
+      <min_required>60%</min_required>
+      <entry_allowed>false</entry_allowed>
+      <reason>Frequency too low: 40% &lt; 60%</reason>
+    </example>
+    <example>
+      <description>Digit Over 5 - High Frequency</description>
+      <barrier>5</barrier>
+      <contract_type>DIGITOVER</contract_type>
+      <recent_digits>[7, 8, 9, 6, 5, 7, 8, 9, 6, 7]</recent_digits>
+      <over_5_digits>[7, 8, 9, 6, 7, 8, 9, 6, 7]</over_5_digits>
+      <frequency>90%</frequency>
+      <min_required>60%</min_required>
+      <entry_allowed>true</entry_allowed>
+      <reason>Frequency sufficient: 90% &gt;= 60%</reason>
+    </example>
+  </entry_point_examples>
+
+  <!-- Safety Checks -->
+  <safety_checks>
+    <check name="balance_validation" enabled="true"
+           description="Verify sufficient balance before trade"/>
+    <check name="contract_validation" enabled="true"
+           description="Verify contract parameters are valid"/>
+    <check name="entry_validation" enabled="true"
+           description="Verify entry conditions are met"/>
+    <check name="stake_validation" enabled="true"
+           description="Verify stake calculation is correct"/>
+    <check name="risk_limit_validation" enabled="true"
+           description="Verify risk limits are respected"/>
+  </safety_checks>
+</strategy>
